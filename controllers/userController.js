@@ -1,7 +1,8 @@
 const User = require('../models/userModel');
 const catchAsyncErrors = require('../middlewares/catchAsyncError');
 const ErrorHandler = require('../utils/errorHandler');
-
+const crypto = require("crypto");
+const sendToken = require('../utils/jwtToken');
 // User Signup
 exports.signup = catchAsyncErrors(async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -11,9 +12,12 @@ exports.signup = catchAsyncErrors(async (req, res, next) => {
         password,
     });
 
-    res.status(201).json({
-        success: true,
-    })
+    // const token = await user.getJWTToken();
+    // res.status(201).json({
+    //     success: true,
+    //     token
+    // })
+    sendToken(user, 201, res);
 })
 
 // User Login
@@ -33,11 +37,12 @@ exports.loginUser = catchAsyncErrors(async (req, res, next) => {
     if (!isPasswordMatched) {
         return next(new ErrorHandler("Invalid email or password", 401));
     }
-    const token = await user.getJWTToken();
-    res.status(200).json({
-        success: true,
-        token,
-    })
+    // const token = await user.getJWTToken();
+    // res.status(200).json({
+    //     success: true,
+    //     token,
+    // })
+    sendToken(user, 200, res);
 })
 
 // Logout User
@@ -49,5 +54,15 @@ exports.logout = catchAsyncErrors(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: "Logged Out"
+    })
+})
+
+// * Get list of all users (for admin)
+exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
+    const users = await User.find();
+
+    res.status(200).json({
+        success: true,
+        users,
     })
 })
